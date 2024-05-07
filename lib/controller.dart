@@ -32,6 +32,7 @@ class Controller {
       client.disconnect();
       connected = false;
       subscribedTopic = "";
+      log('Disconnected to broker');
     }
   }
 
