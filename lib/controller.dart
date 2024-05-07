@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:developer';
+
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
@@ -13,13 +15,15 @@ class Controller {
   Controller({required this.serverId, required this.serverUrl});
 
   Future<void> connectToBroker() async {
-    client = MqttServerClient(serverId, serverUrl);
+    client = MqttServerClient(serverUrl, serverId);
+    client.port = 1883;
 
     try {
       await client.connect();
       connected = true;
+      log('connected to broker');
     } catch (e) {
-      print('Error connecting to broker: $e');
+      log('Error connecting to broker: $e');
     }
   }
 
@@ -36,8 +40,9 @@ class Controller {
       if (connected) {
         client.subscribe(topic, MqttQos.atLeastOnce);
         subscribedTopic = topic;
+        log("Subscribed");
       } else {
-        print("Not connected to broker, cannot subscribe!");
+        log("Not connected to broker, cannot subscribe!");
       }
     }
   }
@@ -47,8 +52,9 @@ class Controller {
       if (connected) {
         client.unsubscribe(subscribedTopic);
         subscribedTopic = "";
+        log("Un-Subscribed");
       } else {
-        print("Not connected to broker, cannot unsubscribe!");
+        log("Not connected to broker, cannot unsubscribe!");
       }
     }
   }
@@ -61,12 +67,12 @@ class Controller {
 
       if (payload != null) {
         client.publishMessage(topic, MqttQos.atLeastOnce, payload);
-        print("Published message '$message' to topic '$topic'");
+        log("Published message '$message' to topic '$topic'");
       } else {
-        print("Error creating payload. Cannot publish!");
+        log("Error creating payload. Cannot publish!");
       }
     } else {
-      print("Not connected to broker, cannot publish!");
+      log("Not connected to broker, cannot publish!");
     }
   }
 }

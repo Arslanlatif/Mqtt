@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mqtt/controller.dart';
 import 'package:mqtt/widget/button.dart';
-import 'package:mqtt_client/mqtt_client.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,13 +12,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController topicController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
+
   Controller controller =
-      Controller(serverId: '1883', serverUrl: 'https://test.mosquitto.org/');
+      Controller(serverUrl: 'test.mosquitto.org', serverId: 'uniqueClientId');
   String publishedMessage = '';
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               if (controller.connected) {
                 controller.disconnect();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('disconnected!')));
               } else {
                 controller.connectToBroker();
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(const SnackBar(content: Text('Connected!')));
               }
               setState(() {});
             },
@@ -59,6 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 final topic = topicController.text;
                 if (topic.isNotEmpty) {
                   controller.subscribe(topic);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Subscribed!')));
+                } else {
+                  controller.unsubscribe();
                 }
               },
               child: const Text('Subscribe')),
@@ -83,6 +87,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     publishedMessage = message;
                   });
+                  // messageController.clear();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Message published!')));
                 }
               },
               child: const Text('Publish the entered message')),
